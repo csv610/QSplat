@@ -27,8 +27,8 @@ Leland Stanford Junior University.  All Rights Reserved.
 #define SHININESS	16.0f
 #define DOF		30.0f
 #define ROT_MULT	2.5f
-#define TRANSZ_MULT	4.5f
-#define WHEEL_MOVE	0.1f
+#define TRANSZ_MULT	2.5f
+#define WHEEL_MOVE	0.05f
 #define RTSIZE		10
 #define DEPTH_FUDGE	0.2f
 #define REFINE_DELAY	0.5f
@@ -121,6 +121,40 @@ void QSplatGUI::setmodel(QSplat_Model *q)
 }
 
 
+void QSplatGUI::draw_bbox()
+{
+	if (!theQSplat_Model) return;
+
+	float xmin = theQSplat_Model->center[0] - theQSplat_Model->radius;
+	float xmax = theQSplat_Model->center[0] + theQSplat_Model->radius;
+	float ymin = theQSplat_Model->center[1] - theQSplat_Model->radius;
+	float ymax = theQSplat_Model->center[1] + theQSplat_Model->radius;
+	float zmin = theQSplat_Model->center[2] - theQSplat_Model->radius;
+	float zmax = theQSplat_Model->center[2] + theQSplat_Model->radius;
+
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(1, 1, 1);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(xmin, ymin, zmin); glVertex3f(xmax, ymin, zmin);
+	glVertex3f(xmax, ymax, zmin); glVertex3f(xmin, ymax, zmin);
+	glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(xmin, ymin, zmax); glVertex3f(xmax, ymin, zmax);
+	glVertex3f(xmax, ymax, zmax); glVertex3f(xmin, ymax, zmax);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex3f(xmin, ymin, zmin); glVertex3f(xmin, ymin, zmax);
+	glVertex3f(xmax, ymin, zmin); glVertex3f(xmax, ymin, zmax);
+	glVertex3f(xmax, ymax, zmin); glVertex3f(xmax, ymax, zmax);
+	glVertex3f(xmin, ymax, zmin); glVertex3f(xmin, ymax, zmax);
+	glEnd();
+
+	glPopAttrib();
+}
+
 // Do a redraw!  That's why we're here...
 void QSplatGUI::redraw()
 {
@@ -184,6 +218,7 @@ void QSplatGUI::redraw()
     if (whichDriver != SOFTWARE &&
         whichDriver != SOFTWARE_TILES &&
         whichDriver != SOFTWARE_BEST) {
+        if (showbbox) draw_bbox();
         draw_light();
         draw_progressbar();
         swapbuffers();
@@ -860,7 +895,7 @@ void QSplatGUI::move(float dx, float dy, float dz)
 	float scalefactor = -0.5f*d_scale;
 	dx *= scalefactor*thecamera.fov;
 	dy *= scalefactor*thecamera.fov;
-	dz = d_scale * (exp(-0.5f * TRANSZ_MULT * dz) - 1.0f);
+	dz = d_scale * (exp(-0.2f * TRANSZ_MULT * dz) - 1.0f);
 
 	thecamera.Move(dx, dy, dz);
 

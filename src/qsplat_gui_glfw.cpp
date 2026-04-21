@@ -11,28 +11,17 @@
 QSplatGLFWGUI* QSplatGLFWGUI::instance = nullptr;
 
 QSplatGLFWGUI::QSplatGLFWGUI()
-    : window(nullptr), winWidth(INIT_WINDOW_WIDTH), winHeight(INIT_WINDOW_HEIGHT),
-      needRedraw(true), fullscreenMode(false), prevWidth(0), prevHeight(0), prevX(0), prevY(0),
-      initialModel(nullptr)
 {
+    instance = this;
+    window = nullptr;
+    fullscreenMode = false;
+    winWidth = INIT_WINDOW_WIDTH;
+    winHeight = INIT_WINDOW_HEIGHT;
 }
 
 QSplatGLFWGUI::~QSplatGLFWGUI()
 {
-    if (window) {
-        glfwDestroyWindow(window);
-    }
-    glfwTerminate();
-}
-
-void QSplatGLFWGUI::ErrorCallback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
-
-void QSplatGLFWGUI::StaticErrorCallback(int error, const char* description)
-{
-    if (instance) instance->ErrorCallback(error, description);
+    if (window) glfwDestroyWindow(window);
 }
 
 void QSplatGLFWGUI::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -50,8 +39,15 @@ void QSplatGLFWGUI::KeyCallback(GLFWwindow* window, int key, int scancode, int a
                 resetviewer();
             }
             break;
+        case GLFW_KEY_H:
+            resetviewer();
+            break;
+        case GLFW_KEY_B:
+            showbbox = !showbbox;
+            break;
         case GLFW_KEY_O:
             if (mods & GLFW_MOD_CONTROL) {
+                // This is a placeholder, actual file dialog would be better
                 const char* filename = "/tmp/test.ply";
                 OpenModel(filename);
             }
@@ -62,8 +58,8 @@ void QSplatGLFWGUI::KeyCallback(GLFWwindow* window, int key, int scancode, int a
             }
             break;
         }
+        needRedraw = true;
     }
-    needRedraw = true;
 }
 
 void QSplatGLFWGUI::StaticKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -126,8 +122,11 @@ void QSplatGLFWGUI::StaticMousePosCallback(GLFWwindow* window, double x, double 
 
 void QSplatGLFWGUI::WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
-    winWidth = width;
-    winHeight = height;
+    if (!fullscreenMode) {
+        winWidth = width;
+        winHeight = height;
+    }
+    glViewport(0, 0, width, height);
     needRedraw = true;
 }
 
@@ -138,22 +137,13 @@ void QSplatGLFWGUI::StaticWindowSizeCallback(GLFWwindow* window, int width, int 
 
 void QSplatGLFWGUI::Go()
 {
-    instance = this;
-
-    if (!glfwInit()) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
-        return;
-    }
-
-    glfwSetErrorCallback(StaticErrorCallback);
+    if (!glfwInit()) return;
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
-
-    window = glfwCreateWindow(winWidth, winHeight, "QSplat", nullptr, nullptr);
+    
+    window = glfwCreateWindow(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT, "QSplat", NULL, NULL);
     if (!window) {
-        fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
         return;
     }
@@ -200,47 +190,54 @@ void QSplatGLFWGUI::Go()
 
 void QSplatGLFWGUI::fullscreen(bool go_fullscreen)
 {
-    if (go_fullscreen && !fullscreenMode) {
+    if (go_fullscreen == fullscreenMode) return;
+
+    if (go_fullscreen) {
         glfwGetWindowPos(window, &prevX, &prevY);
         glfwGetWindowSize(window, &prevWidth, &prevHeight);
+
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
         glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-        fullscreenMode = true;
-    } else if (!go_fullscreen && fullscreenMode) {
-        glfwSetWindowMonitor(window, nullptr, prevX, prevY, prevWidth, prevHeight, 0);
-        fullscreenMode = false;
+        winWidth = mode->width;
+        winHeight = mode->height;
+    } else {
+        glfwSetWindowMonitor(window, NULL, prevX, prevY, prevWidth, prevHeight, 0);
+        winWidth = prevWidth;
+        winHeight = prevHeight;
     }
+    fullscreenMode = go_fullscreen;
     needRedraw = true;
 }
 
 void QSplatGLFWGUI::swapbuffers()
 {
-    if (window) {
-        glfwSwapBuffers(window);
-    }
+    glfwSwapBuffers(window);
 }
 
 void QSplatGLFWGUI::updatestatus(const char* text)
 {
+    char title[256];
+    sprintf(title, "QSplat - %s", text);
+    glfwSetWindowTitle(window, title);
 }
 
 void QSplatGLFWGUI::updaterate(const char* text)
 {
+    // For now, we can append to the title or just ignore
 }
 
 void QSplatGLFWGUI::aboutmodel()
 {
-    if (theQSplat_Model) {
-        display_dialog("About this Model", theQSplat_Model->comments.c_str());
-    } else {
-        display_dialog("", "No model loaded.");
-    }
+    if (theQSplat_Model)
+        display_dialog("About Model", theQSplat_Model->comments.c_str());
+    else
+        display_dialog("About Model", "No model loaded.");
 }
 
 void QSplatGLFWGUI::aboutqsplat()
 {
-    display_dialog("About QSplat", "QSplat version 1.02\nby Szymon Rusinkiewicz\n\nCopyright (c) 1999-2000\nStanford University");
+    display_dialog("About QSplat", "Modernized QSplat Port\nOriginal by Szymon Rusinkiewicz and Marc Levoy");
 }
 
 void QSplatGLFWGUI::display_dialog(const char* title, const char* message)
@@ -258,10 +255,8 @@ int main_gui_main(int argc, char** argv)
     QSplatGLFWGUI gui;
     theQSplatGUI = &gui;
 
-    const char* filename = nullptr;
     if (argc > 1) {
-        filename = argv[1];
-        gui.OpenModel(filename);
+        gui.SetInitialModel(argv[1]);
     }
 
     gui.Go();

@@ -57,12 +57,6 @@ public:
     void flush_modern_rendering();
 
 private:
-	// Parameters the drawing routine cares about
-	Camera thecamera;
-	vec lightdir;
-	float specular;
-	bool backfacecull;
-
 	// Utility functions
         void setupGLstate();
 	void setup_matrices(bool dolighting);
@@ -75,10 +69,17 @@ private:
 	void mouse_i2f(int, int, float *, float *);
 	void draw_light();
 	void draw_progressbar();
+	void draw_bbox();
 
-	// GUI modes and internal state
-	bool dorefine;
-	float desiredrate;
+protected:
+	// Parameters the drawing routine cares about
+	Camera thecamera;
+	vec lightdir;
+	float specular;
+	bool backfacecull;
+
+    bool showbbox;
+	mousebutton last_button;
 	bool touristmode;
 	enum { SHOWLIGHT_OFF, SHOWLIGHT_ON, SHOWLIGHT_NEVER } showlight;
 	enum { PROGRESS_OFF, PROGRESS_ON, PROGRESS_NEVER } showprogressbar;
@@ -94,9 +95,10 @@ private:
 	float spinspeed;
 	vec spinaxis;
 
+    // GUI modes and internal state
+    bool dorefine;
+    float desiredrate;
 
-protected:
-	mousebutton last_button;
 	// The QSplat structure
 	QSplat_Model *theQSplat_Model;
 
@@ -158,7 +160,7 @@ public:
 
 	// Initialize
 	QSplatGUI() : pointShader(nullptr), vao(0), vbo(0), last_mousex(-1), last_mousey(-1),
-		      last_button(NO_BUTTON), theQSplat_Model(NULL)
+		      last_button(NO_BUTTON), theQSplat_Model(NULL), showbbox(false), desiredrate(60.0f)
 	{
                 set_shiny(true);
 		set_backfacecull(true);
