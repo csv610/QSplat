@@ -108,6 +108,13 @@ Modern engines have introduced technologies like Unreal Engine’s *Nanite*, whi
 2.  **Constant-Time Complexity:** The rendering time in QSplat is proportional to the **screen resolution**, not the model's total polygon count. No matter how large the dataset, the renderer only touches the data necessary to fill the pixels on screen.
 3.  **Topology Independence:** Unlike triangles, which require maintaining connectivity (edge sharing, manifolds), points are independent. This makes it much easier to visualize "noisy" data from 3D scanners or LiDAR without the overhead of surface reconstruction.
 
+### QSplat vs. Instance Rendering
+Hardware Instance Rendering (`glDrawArraysInstanced`) is a modern technique designed to render thousands of copies of the *same* complex mesh (like a forest of trees or a crowd of characters) with a single draw call. While both QSplat and Instancing aim to reduce draw call overhead, they solve different problems:
+
+*   **Geometry Complexity:** Instance rendering excels when the repeated object is complex (e.g., a 1,000-triangle tree). QSplat, conversely, focuses on "atomic" geometry—points or simple quads. In QSplat, the "complexity" lies in the **billions of unique points**, not the complexity of a single instance.
+*   **Data Uniqueness:** In a standard instanced scene, most data (vertex positions, UVs) is shared across instances. In QSplat, every visible node has **unique attributes** (specific quantized color, unique normal, and a precise position in the hierarchy). Because every splat is different, the benefits of pure instancing are reduced, making **VBO Batching** (our current modernized approach) more efficient than Instancing for simple point clouds.
+*   **The Hybrid Path:** Modern high-fidelity splatters (like 3D Gaussian Splatting) sometimes use a hybrid approach: using Instance Rendering to draw a high-quality "proxy" shape (like a 3D sphere or a Gaussian ellipsoid) for every point in the cloud. This allows the GPU to handle the "roundness" of the splats while the CPU/Compute shader handles the hierarchy traversal.
+
 ### Is Splatting Still Useful Today?
 Absolutely. We are currently seeing a massive resurgence in point-based rendering:
 
