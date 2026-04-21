@@ -1,39 +1,47 @@
-# QSplat (Modernized Port)
+# QSplat: High-Performance Multiresolution Point-Cloud Renderer
 
-This is a modernized port of **QSplat**, a multiresolution point-cloud renderer originally developed at Stanford University by Szymon Rusinkiewicz and Marc Levoy.
+A modernized, high-performance port of the pioneering **QSplat** multiresolution point-rendering system. This version is specifically optimized for modern hardware, including Apple Silicon (M1/M2/M3) and high-resolution displays, while maintaining the legendary interaction model of the original Stanford implementation.
 
-## Original Credits
-QSplat was originally developed (1999-2000) by:
-- **Szymon Rusinkiewicz** (Stanford University)
-- **Marc Levoy** (Stanford University)
+---
 
-The original project provided a pioneering multiresolution structure for real-time visualization of massive meshes, such as the Michelangelo's David.
+## Project Overview
 
-## Modernization Contributions
-This fork (2026) aims to bring the original codebase into the modern era while preserving the carefully tuned interaction logic of the original. Key improvements include:
+QSplat is a multiresolution visualization system based on a bounding sphere hierarchy. Originally designed to handle massive meshes (such as those from the Digital Michelangelo Project), it allows for real-time navigation of hundreds of millions of points by dynamically adjusting the level of detail based on view parameters and performance targets.
 
-- **M1/M2/M3 Silicon Optimization:** Transitioned from CPU-heavy "Immediate Mode" rendering to a modern **GPU-accelerated pipeline**.
-- **Vertex Buffer Objects (VBOs):** Implemented batch rendering using VAOs/VBOs to leverage the massive parallelism of modern Mac GPUs.
-- **Programmable Shaders:** Integrated a custom GLSL shader pipeline to handle point rendering and lighting.
-- **GLM Integration:** Incorporated the industry-standard **OpenGL Mathematics (GLM)** library for efficient GPU data alignment and shader communication.
-- **Modern Build System:** Replaced legacy Makefiles with a clean **CMake** configuration compatible with latest compilers (C++17).
-- **Enhanced Interaction:** 
-    - Added **Scroll Wheel Zoom** support.
-    - Implemented laptop-friendly shortcuts (**SHIFT+Left** for Panning, **CTRL+Left** for Zooming).
-    - Fixed legacy event-loop bugs to ensure 60+ FPS smoothness on high-resolution displays.
-- **Stability:** Fixed "scene recovery" bugs where models would disappear or become unresponsive during extreme zooming.
+This port maintains the core data structure and file format integrity while replacing the legacy, CPU-bound rendering pipeline with a modern, GPU-accelerated architecture.
 
-## Technical Note on Math
-While the rendering pipeline now uses modern GLM-backed buffers, the core camera interaction math (Quaternions/Translations) has been intentionally kept in its original form. This ensures that the highly-tuned "feel" of the original viewer is preserved exactly as the authors intended.
+## Key Modernization Features
+
+### 🚀 Hardware Optimization
+*   **Silicon-Native Performance:** Optimized for Apple Silicon integrated GPUs and modern discrete graphics.
+*   **GPU-Accelerated Pipeline:** Transitioned from legacy "Immediate Mode" to **Vertex Buffer Objects (VBOs)** and **Vertex Array Objects (VAOs)**, offloading the rendering workload from the CPU to the GPU.
+*   **Programmable Shading:** Implemented a GLSL-based shader pipeline for efficient point rasterization and real-time lighting.
+
+### 🛠 Modern Engineering
+*   **GLM Integration:** Utilizes the industry-standard **OpenGL Mathematics (GLM)** library for robust, shader-compatible data structures.
+*   **CMake Build System:** Replaced legacy Makefiles with a cross-platform CMake configuration, ensuring compatibility with the latest C++17 compilers and IDEs.
+*   **Smooth Motion:** Re-engineered the event loop to ensure consistent 60+ FPS performance even on Retina and 4K displays.
+
+### 🖱 Enhanced Interaction Design
+*   **Standardized Navigation:** Intuitive scroll-wheel zooming and improved panning sensitivity.
+*   **Laptop & Trackpad Support:** Integrated modifier-key shortcuts (`SHIFT` and `CTRL`) for seamless navigation on mobile workstations.
+*   **Stability Enhancements:** Resolved legacy bugs related to near-plane clipping and scene recovery during extreme zooming.
+
+---
 
 ## Installation
 
 ### Prerequisites
-Ensure you have the following installed (recommended via Homebrew on macOS):
+The project requires a modern C++ compiler and the following libraries:
 - **CMake** (3.16+)
-- **GLFW** (`brew install glfw`)
-- **GLM** (`brew install glm`)
-- **OpenGL** (Included with macOS)
+- **GLFW 3**
+- **GLM**
+- **OpenGL**
+
+On macOS, these can be installed via Homebrew:
+```bash
+brew install cmake glfw glm
+```
 
 ### Build Instructions
 ```bash
@@ -41,39 +49,51 @@ Ensure you have the following installed (recommended via Homebrew on macOS):
 git clone git@github.com:csv610/QSplat.git
 cd QSplat
 
-# Create a build directory
+# Create and enter build directory
 mkdir build && cd build
 
-# Configure and build
+# Configure and compile
 cmake ..
 make -j$(sysctl -n hw.ncpu)
 ```
 
+---
+
 ## Usage
 
-### 1. Converting Models
-QSplat uses its own multiresolution `.qs` format. You must first convert a `.ply` mesh:
+### 1. Data Preparation
+Convert standard `.ply` meshes into the optimized `.qs` multiresolution format:
 ```bash
 ./qsplat_make input.ply output.qs
 ```
 
-### 2. Viewing Models
-Launch the modernized GPU-accelerated viewer:
+### 2. Visualization
+Launch the high-performance viewer:
 ```bash
 ./qsplat model.qs
 ```
 
-### Controls & Shortcuts
-The interaction has been modernized for better usability on laptops and high-resolution displays:
+### Controls Reference
+The interaction model preserves the original "feel" while adding modern conveniences:
 
-| Action | Control |
+| Action | Input |
 | :--- | :--- |
 | **Rotate** | Left Mouse Button (Drag) |
-| **Zoom** | Scroll Wheel **OR** `CTRL` + Left Mouse Button |
-| **Pan** | Right Mouse Button **OR** `SHIFT` + Left Mouse Button |
+| **Zoom** | Scroll Wheel / `CTRL` + Left Mouse Button |
+| **Translate (Pan)** | Right Mouse Button / `SHIFT` + Left Mouse Button |
 | **Reset View** | `CTRL` + `R` |
 | **Toggle Fullscreen** | `F` |
-| **Quit** | `ESC` (exit fullscreen) or `CTRL` + `Q` |
+| **Exit** | `ESC` / `CTRL` + `Q` |
+
+---
+
+## Credits & History
+
+**Original Software (1999-2000):**
+QSplat was originally designed and implemented by **Szymon Rusinkiewicz** and **Marc Levoy** at the Stanford University Computer Graphics Laboratory. It remains a landmark project in the history of computer graphics and massive data visualization.
+
+**Modernization Port (2026):**
+This version focuses on architectural modernization, GPU optimization, and cross-platform build stability for contemporary research and professional workflows.
 
 ## License
-This software is provided "as is" and remains subject to the original Stanford University licensing terms found in the `README` file (original documentation).
+This project is subject to the original Stanford University licensing terms. Please refer to the `README` file (original documentation) for detailed licensing and usage restrictions.
