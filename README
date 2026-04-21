@@ -1,0 +1,219 @@
+
+               QSplat: A Multiresolution Point Rendering System
+
+                              Szymon Rusinkiewicz
+                              Stanford University
+
+                                 Version 1.0
+
+
+********
+Overview
+********
+
+QSplat is a program for displaying large geometric models in real time.  It
+was originally designed during the course of the Digital Michelangelo Project,
+to render the hundred-million-polygon models we were producing.  It features: 
+
+ - Fast startup and progressive loading 
+ - Real-time interactive display with a user-selectable frame rate 
+ - Refinement to a high-quality rendering when idle 
+ - Point-based multiresolution representation with splat rendering,
+   level-of-detail control, and hierarchical visibility culling 
+ - Compact representation - 6 bytes per input point including per-vertex
+   normals, 9 bytes including color 
+ - Fast preprocessing 
+
+A detailed description of QSplat may be found in the paper
+
+    "QSplat: A Multiresolution Point Rendering System for Large Meshes"
+
+by Szymon Rusinkiewicz and Marc Levoy.  The paper appears in the proceedings
+of SIGGRAPH 2000, and is also available online at
+
+    http://graphics.stanford.edu/papers/qsplat
+
+
+******************************
+Binary and source code release
+******************************
+
+QSplat is being made available subject to the following terms:
+
+    Copyright (c) 1999-2000 The Board of Trustees of The Leland Stanford
+    Junior University.  All Rights Reserved.
+
+    This software may be downloaded, copied, and used for non-commercial
+    academic and research purposes only. Modifications to the code may be
+    made, provided that this copyright notice is preserved and source code
+    to all such modifications is made publically available.  Any other use
+    of the software, including commercial resale, lease, or redistribution,
+    requires a separate license - contact smr@cs.stanford.edu for details.
+
+    This software is provided "as is" and without warranty of any kind,
+    express, implied, or otherwise, including without limitation, any warranty
+    of merchantability or fitness for a particular purpose. 
+
+This release includes source code in C++, as well as binaries for Linux, IRIX,
+and Windows systems.  The latest version is available from
+
+    http://graphics.stanford.edu/software/qsplat
+
+
+*******************
+System Requirements
+*******************
+
+QSplat is known to work well with the following configurations:
+
+ - SGI Octane, Onyx2
+ - PC with > 500MHz processor, NVidia GeForce graphics card
+ - Power Macintosh G4 
+
+QSplat will run on slower computers, but may only achieve acceptable
+quality when set to smaller window sizes and/or lower frame rates.  For
+systems without hardware-accelerated OpenGL, you may use either a software
+OpenGL implementation or QSplat's internal software-only rasterizer.
+
+The released binaries have the following requirements:
+
+ - Linux
+	glibc 2.1 (e.g. Red Hat 6.x)
+	OpenGL dynamic libraries - either Mesa 3.x or XFree86 4.x
+	XForms dynamic library, version 0.88
+
+ - IRIX
+	IRIX 6.5.x
+
+ - Windows
+	Windows 95, 98, NT, 2000
+	OpenGL drivers
+ - Macintosh: 
+	Mac OS 10 with Developer Tools installed 	wxWindows 
+
+
+**************
+Running QSplat
+**************
+
+You may specify a .qs model on the command line or load it from within
+QSplat (File menu -> Open).  When loading a model, QSplat also checks
+for the presence of a file with the same name as the model but with a
+.xf extension - this specifies a transformation matrix to be used for
+the initial camera position and orientation.
+
+Mouse bindings are as follows:
+
+ - Three button mice: (Inventor-like bindings)
+	Left button:  rotate
+	Middle button:  pan
+	Left+middle buttons:  zoom (dolly)
+	Right button:  change light
+	Mouse wheel (if present and configured properly):  zoom (dolly)
+
+ - Two button mice:
+	Left button:  rotate
+	Right button:  pan
+	Left+right buttons:  zoom (dolly)
+	Control+left button:  change light
+	Mouse wheel (if present and configured properly):  zoom (dolly)
+
+Under UNIX, the system will try to guess whether you have a two- or
+three-button mouse.  This may be overridden by setting either the
+"TWO_BUTTON_MOUSE" or "THREE_BUTTON_MOUSE" environment variables.
+Under Windows, the two-button mouse bindings are always used.
+
+Menu options are:
+
+    File->Open:  Load a .qs file
+
+    File->Quit:  Self explanatory
+
+    Options->Shiny:  Toggle whether the material properties have a specular
+      component.  Has no effect when the "Software" rendering drivers are 
+      used.
+
+    Options->Backface cull:  Toggles whether backface culling is performed.
+
+    Options->Show light:  Toggles the display of a light source direction
+      widget when the light is changed.  Has no effect when the "Software"
+      rendering drivers are used.
+
+    Options->Show refinement:  Toggles the display of a progress bar indicating
+      how much detail is currently being displayed.  Has no effect when the
+      "Software" rendering drivers are used.
+
+    Options->Auto-spin:  Toggles whether an Inventor-like autospin is performed.
+      When on, QSplat will start to spin the model when the left mouse button
+      is released with the mouse in motion.  This spin may be stopped by
+      clicking any button.
+
+    Driver menu:  Selects the method of rendering splats.  The various methods
+      may differ greatly in speed and quality depending on the capabilities
+      of the graphics hardware.  Suggested settings:
+
+	Most SGI systems:  "OpenGL - Points"
+	NVidia GeForce/Quadro/GeForce2:  "OpenGL - Round points"
+	Graphics cards without accelerated points:  "OpenGL - Quads"
+	No 3D acceleration:  "Software - Optimal"
+	Highest quality per splat:  "OpenGL - Ellipses"
+	Fun visualizations: "Small ellipses", "Spheres"
+
+    Commands->Fullscreen:  Zooms the window to fill the screen.
+
+    Commands->Reset viewer:  Resets the position of the camera and light
+      to the defaults.
+
+    Frame rate slider (UNIX) or Commands->Set framerate (Windows):  Sets the
+      target frame rate for interactive manipulation.  Note that because of
+      fill rate limitations the actual frame rate might not keep up with
+      the selected rate when it is set too high.  Picture quality suffers
+      dramatically under these circumstances.
+
+
+****************
+Compiling QSplat
+****************
+
+UNIX and Mac OS X:
+ - Requirements: 
+	Linux, SGI, and Mac OS X (Darwin) platforms have been tested
+	C++ compiler (g++ 2.9x and SGI MipsPro 7.30 have been tested)
+	XForms version 0.88 (for UNIX)
+	GNU make (version 3.77 has been tested)
+ - Procedures:
+	Edit Makedefs.Linux. Makedefs.IRIX or Makedefs.Darwin to set local paths and options.
+	make
+
+Windows:
+	A Visual C++ 6.0 workspace and associated resources are included
+
+
+**********************
+Converting .ply to .qs
+**********************
+
+The program qsplat_make creates .qs files from polygonal models.  Currently
+the only supported input format is a restricted subset of .ply files.
+qsplat_make is a command-line-only application.  Usage is
+
+    qsplat_make [-m threshold] in.ply out.qs
+
+The -m option specifies a threshold (in mesh units) for merging nearby
+vertices before creating the hierarchy.  It is especially suitable for use
+with marching cubes output, since the latter tends to contain many "sliver"
+triangles.
+
+
+*******
+Credits
+*******
+
+Marc Levoy provided many useful suggestions about QSplat, and coauthored the
+paper.  Gary King ported the software to Windows and contributed many features,
+including the tile-based software renderer.  QSplat also benefitted from
+conversations with Dave Koller, Jonathan Shade, Matt Ginzton, Kari Pulli, Lucas
+Pereira, and James Davis.  The Digital Michelangelo Project was sponsored by
+Stanford University, Interval Research Corporation, and the Paul Allen
+Foundation for the Arts. Macintosh port by Jonathan Berger.
+

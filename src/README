@@ -1,0 +1,19 @@
+
+Note:
+ This source currently only compiles and runs on Mac OS X. An attempt was made to port the earlier 
+XForms-based QSplat code to wxWindows, unifying the source and creating a single Makefile. This process 
+was never completed.
+
+To make and install wxWindows for Mac OS X:
+mkdir wxdev
+cd wxdev
+cvs -d:pserver:anoncvs@cvs.wxwindows.org:/home/wxcvs checkout wxWindows
+cd wxWindows
+mkdir build
+cd build
+../configure --with-opengl --disable-shared --enable-no_rtti
+make
+   If desired, edit Makefile and change the "prefix" variable to wherever 
+  you would like wxWindows installed.
+make install
+

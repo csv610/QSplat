@@ -1,0 +1,7 @@
+build/
+.DS_Store
+*.qs
+*.ply
+.gdb_history
+src/.DS_Store
+src/.gdb_history
