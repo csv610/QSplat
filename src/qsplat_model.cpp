@@ -9,6 +9,7 @@ Copyright (c) 1999-2000 The Board of Trustees of the
 Leland Stanford Junior University.  All Rights Reserved.
 */
 
+#define GL_SILENCE_DEPRECATION
 #include "qsplat_model.h"
 
 #include <stdio.h>
@@ -68,7 +69,7 @@ static void Error(const char *s1, const char *s2)
 {
 #ifdef WIN32
 	char buf[255];
-	sprintf(buf, "%s%s",s1, s2);
+	snprintf(buf, sizeof(buf), "%s%s",s1, s2);
 	MessageBox(NULL, buf, "QSplat", MB_OK | MB_ICONEXCLAMATION);
 #else
 	fprintf(stderr, "%s%s\n", s1, s2);
@@ -251,14 +252,14 @@ bool QSplat_Model::MapFile(HANDLE fd, off_t len,
 	do {
 		if (fdMapping)
 			CloseHandle(fdMapping);
-		sprintf(mapName, "QSplat%d", mapNum++);
+		snprintf(mapName, sizeof(mapName), "QSplat%d", mapNum++);
 		fdMapping = CreateFileMapping(fd, NULL, PAGE_READONLY,
 					      0, len, mapName);
 	} while ((error = GetLastError()) == ERROR_ALREADY_EXISTS);
 
 	if (!fdMapping || error != NO_ERROR) {
 		char fdError[32];
-		sprintf(fdError, "Mapping Error: %d", error);
+		snprintf(fdError, sizeof(fdError), "Mapping Error: %d", error);
 		MessageBox(NULL, fdError, NULL, MB_OK);
 		return false;
 	}
@@ -269,7 +270,7 @@ bool QSplat_Model::MapFile(HANDLE fd, off_t len,
 		return true;
 
 	char errorstr[32];
-	sprintf(errorstr, "Can't Allocate Memory! (%d)\n", GetLastError());
+	snprintf(errorstr, sizeof(errorstr), "Can't Allocate Memory! (%d)\n", GetLastError());
 	MessageBox(NULL, errorstr, NULL, MB_OK | MB_ICONHAND);
 	return false;
 
@@ -352,7 +353,7 @@ bool QSplat_Model::BuildFragmentList(const char *filename)
 			return false;
 		}
 		char buf[3];
-		sprintf(buf, "%02d", QSPLAT_FILE_VERSION);
+		snprintf(buf, sizeof(buf), "%02d", QSPLAT_FILE_VERSION);
 		if (here[6] != buf[0] || here[7] != buf[1]) {
 			Error(filename, " was made for a different version of QSplat");
 			return false;
@@ -394,10 +395,10 @@ bool QSplat_Model::BuildFragmentList(const char *filename)
 	radius = 0.5f*sqrtf(sqr(xmax-xmin) + sqr(ymax-ymin) + sqr(zmax-zmin));
 
 	char buf[255];
-	sprintf(buf, "%d leaf points\n", leaf_points);
+	snprintf(buf, sizeof(buf), "%d leaf points\n", leaf_points);
 	comments += buf;
 #ifndef WIN32
-	fprintf(stderr, buf);
+	fprintf(stderr, "%s", buf);
 #endif
 	return true;
 }

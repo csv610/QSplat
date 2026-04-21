@@ -8,6 +8,7 @@ Copyright (c) 1999-2000 The Board of Trustees of the
 Leland Stanford Junior University.  All Rights Reserved.
 */
 
+#define GL_SILENCE_DEPRECATION
 #include <stdio.h>
 
 #include "qsplat_gui.h"
@@ -26,14 +27,16 @@ Leland Stanford Junior University.  All Rights Reserved.
 #define LIGHT		0.85f
 #define SHININESS	16.0f
 #define DOF		30.0f
-#define ROT_MULT	2.5f
-#define TRANSZ_MULT	2.5f
+#define ROT_MULT	1.2f
+#define TRANSZ_MULT	1.2f
+#define TRANSXY_MULT	1.0f
 #define WHEEL_MOVE	0.05f
 #define RTSIZE		10
 #define DEPTH_FUDGE	0.2f
 #define REFINE_DELAY	0.5f
 #define SHOWLIGHT_TIME	2.5f
 #define SHOWPROG_TIME	1.5f
+#define MOUSE_DEADZONE	0.001f
 
 
 #include "qsplat_make_from_mesh.h"
@@ -60,7 +63,7 @@ std::string QSplatGUI::AutoMakeQS(const char *filename)
     // Generate a temporary filename in /tmp/
     char tmpname[255];
     static int counter = 0;
-    sprintf(tmpname, "/tmp/qsplat_auto_%d.qs", counter++);
+    snprintf(tmpname, sizeof(tmpname), "/tmp/qsplat_auto_%d.qs", counter++);
 
     if (RunMakeQS(filename, tmpname)) {
         printf("Conversion successful: %s\n", tmpname);
@@ -230,7 +233,7 @@ void QSplatGUI::redraw()
     float elapsed = end_time - start_time;
 
     char ratemsg[255];
-    sprintf(ratemsg, "%d points, %.3f sec.", pts_splatted, elapsed);
+    snprintf(ratemsg, sizeof(ratemsg), "%d points, %.3f sec.", pts_splatted, elapsed);
     updaterate(ratemsg);
 
     if (dorefine) {
@@ -407,8 +410,10 @@ void QSplatGUI::mouse(int x, int y, mousebutton this_button)
 	mouse_i2f(x, y, &this_mousex, &this_mousey);
 
 
-	// We are not interested in duplicate events
-	if (this_mousex == last_mousex && this_mousey == last_mousey &&
+	// We are not interested in small mouse motions (deadzone) or duplicate events
+	float dx = this_mousex - last_mousex;
+	float dy = this_mousey - last_mousey;
+	if (dx*dx + dy*dy < MOUSE_DEADZONE*MOUSE_DEADZONE &&
 	    this_button != UP_WHEEL && this_button != DOWN_WHEEL &&
 	    this_button == last_button)
 		return;
@@ -892,7 +897,7 @@ void QSplatGUI::move(float dx, float dy, float dz)
 	if (d_scale < min_scale)
 		d_scale = min_scale;
 
-	float scalefactor = -0.5f*d_scale;
+	float scalefactor = -0.5f*d_scale * TRANSXY_MULT;
 	dx *= scalefactor*thecamera.fov;
 	dy *= scalefactor*thecamera.fov;
 	dz = d_scale * (exp(-0.2f * TRANSZ_MULT * dz) - 1.0f);

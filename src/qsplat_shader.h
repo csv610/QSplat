@@ -3,7 +3,11 @@
 
 #include <string>
 #include <vector>
-#include <OpenGL/gl3.h>
+#ifdef DARWIN
+# include <OpenGL/gl.h>
+#else
+# include <GL/gl.h>
+#endif
 #include <glm/glm.hpp>
 
 class Shader {

@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 /*
 Gary King
 Szymon Rusinkiewicz
@@ -309,7 +310,7 @@ void end_drawing_software_tiles(bool bailed)
 	int i=0;
 	for (int y=0; y < vert_tiles; y++)
 	{
-		if (y & 7 == 0)
+		if ((y & 7) == 0)
 		{
 			timestamp now;
 			get_timestamp(now);

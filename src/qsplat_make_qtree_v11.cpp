@@ -403,7 +403,7 @@ static inline void write_comments(FILE *f, const std::string &comments)
 	int s = comments.size();
 	int padding = (4 - (s % 4)) % 4;
 	unsigned char buf[9];
-	sprintf((char *)buf, "%s%02d", QSPLAT_MAGIC, QSPLAT_FILE_VERSION);
+	snprintf((char *)buf, sizeof(buf), "%s%02d", QSPLAT_MAGIC, QSPLAT_FILE_VERSION);
 	fwrite((void *)buf, 8, 1, f);
 	write_int(f, 20 + s + padding);
 	write_int(f, 0);
@@ -431,7 +431,7 @@ void QTree::Write(const char *qsfile, const std::string &comments)
 
 	// Write out magic number
 	unsigned char buf[9];
-	sprintf((char *)buf, "%s%02d", QSPLAT_MAGIC, QSPLAT_FILE_VERSION);
+	snprintf((char *)buf, sizeof(buf), "%s%02d", QSPLAT_MAGIC, QSPLAT_FILE_VERSION);
 	fwrite((void *)buf, 8, 1, f);
 
 	// Write out file length

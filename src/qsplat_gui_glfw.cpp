@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 #include "qsplat_gui_glfw.h"
 #include "qsplat_gui_camera.h"
 #include "qsplat_model.h"
@@ -218,7 +219,7 @@ void QSplatGLFWGUI::swapbuffers()
 void QSplatGLFWGUI::updatestatus(const char* text)
 {
     char title[256];
-    sprintf(title, "QSplat - %s", text);
+    snprintf(title, sizeof(title), "QSplat - %s", text);
     glfwSetWindowTitle(window, title);
 }
 

@@ -1,3 +1,4 @@
+#define GL_SILENCE_DEPRECATION
 #include "qsplat_shader.h"
 #include <iostream>
 #include <OpenGL/gl.h>
