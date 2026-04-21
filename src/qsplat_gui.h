@@ -30,11 +30,30 @@ enum Driver { OPENGL_POINTS, OPENGL_POINTS_CIRC,
 	      DONT_DRAW };
 
 
+#include "qsplat_shader.h"
+#include <vector>
+
+struct QSplatVertex {
+    glm::vec3 pos;
+    glm::vec3 color;
+    glm::vec3 normal;
+};
+
+
 // The GUI class.  System-specific GUIs are derived from this
 class QSplatGUI {
 public:
 	enum mousebutton { NO_BUTTON, ROT_BUTTON, TRANSXY_BUTTON, TRANSZ_BUTTON,
 			   LIGHT_BUTTON, UP_WHEEL, DOWN_WHEEL };
+
+    virtual ~QSplatGUI();
+
+    // Modern rendering members
+    std::vector<QSplatVertex> vertexBuffer;
+    Shader* pointShader = nullptr;
+    GLuint vao = 0, vbo = 0;
+    void init_modern_rendering();
+    void flush_modern_rendering();
 
 private:
 	// Parameters the drawing routine cares about
@@ -137,7 +156,7 @@ public:
         
 
 	// Initialize
-	QSplatGUI() : last_mousex(-1), last_mousey(-1),
+	QSplatGUI() : pointShader(nullptr), vao(0), vbo(0), last_mousex(-1), last_mousey(-1),
 		      last_button(NO_BUTTON), theQSplat_Model(NULL)
 	{
                 set_shiny(true);

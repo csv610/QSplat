@@ -124,6 +124,23 @@ void drawpoint_gl(float cx, float cy, float cz,
 		  float r, float splatsize,
 		  const float *norm, const float *col)
 {
+    if (theQSplatGUI->whichDriver == OPENGL_POINTS) {
+        QSplatVertex v;
+        v.pos = glm::vec3(cx, cy, cz);
+        if (col) v.color = glm::vec3(col[0], col[1], col[2]);
+        else v.color = glm::vec3(1.0f, 1.0f, 1.0f);
+        if (norm) v.normal = glm::vec3(norm[0], norm[1], norm[2]);
+        else v.normal = glm::vec3(0, 0, 1.0f);
+        
+        theQSplatGUI->vertexBuffer.push_back(v);
+        
+        if (theQSplatGUI->vertexBuffer.size() >= 50000) {
+            theQSplatGUI->flush_modern_rendering();
+        }
+        theQSplatGUI->pts_splatted++;
+        return;
+    }
+
 	if (splatsize <= point_size_thresh) {
 
 		// ceilf is slow on many systems

@@ -8,7 +8,7 @@ find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
 
-include_directories(${GLFW_INCLUDE_DIRS})
+include_directories(${GLFW_INCLUDE_DIRS} /opt/homebrew/include)
 link_directories(${GLFW_LIBRARY_DIRS})
 
 set(COMMON_SOURCES
@@ -22,6 +22,7 @@ set(QSPLAT_VIEWER_SOURCES
     src/qsplat_gui.cpp
     src/qsplat_gui_camera.cpp
     src/qsplat_model.cpp
+    src/qsplat_shader.cpp
     src/qsplat_draw_gl.cpp
     src/qsplat_draw_gl_ellip.cpp
     src/qsplat_draw_gaussian.cpp

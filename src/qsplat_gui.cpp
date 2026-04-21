@@ -39,6 +39,13 @@ Leland Stanford Junior University.  All Rights Reserved.
 // The GUI global variable
 QSplatGUI *theQSplatGUI;
 
+QSplatGUI::~QSplatGUI()
+{
+    if (pointShader) delete pointShader;
+    if (vao) glDeleteVertexArraysAPPLE(1, &vao);
+    if (vbo) glDeleteBuffers(1, &vbo);
+}
+
 void QSplatGUI::OpenModel(const char *filename)
 {
     setmodel(NULL);
@@ -577,6 +584,80 @@ void QSplatGUI::setupGLstate()
 
 
 // Set up projection and modelview matrices, and (optionally) lighting
+const char* pointVertexShaderSource = R"(
+#version 120
+attribute vec3 aPos;
+attribute vec3 aColor;
+attribute vec3 aNormal;
+varying vec3 vColor;
+uniform mat4 projection;
+uniform mat4 view;
+void main() {
+    vColor = aColor;
+    gl_Position = projection * view * vec4(aPos, 1.0);
+    gl_PointSize = 2.0; // Fixed size for now
+}
+)";
+
+const char* pointFragmentShaderSource = R"(
+#version 120
+varying vec3 vColor;
+void main() {
+    gl_FragColor = vec4(vColor, 1.0);
+}
+)";
+
+void QSplatGUI::init_modern_rendering()
+{
+    if (pointShader) return;
+    pointShader = new Shader(pointVertexShaderSource, pointFragmentShaderSource);
+
+    glGenVertexArraysAPPLE(1, &vao);
+    glBindVertexArrayAPPLE(vao);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    GLint posAttrib = glGetAttribLocation(pointShader->ID, "aPos");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(QSplatVertex), (void*)offsetof(QSplatVertex, pos));
+
+    GLint colAttrib = glGetAttribLocation(pointShader->ID, "aColor");
+    glEnableVertexAttribArray(colAttrib);
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(QSplatVertex), (void*)offsetof(QSplatVertex, color));
+
+    GLint normAttrib = glGetAttribLocation(pointShader->ID, "aNormal");
+    glEnableVertexAttribArray(normAttrib);
+    glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(QSplatVertex), (void*)offsetof(QSplatVertex, normal));
+
+    glBindVertexArrayAPPLE(0);
+}
+
+void QSplatGUI::flush_modern_rendering()
+{
+    if (vertexBuffer.empty()) return;
+
+    init_modern_rendering();
+    pointShader->use();
+
+    // Get matrices from legacy OpenGL state (for now)
+    float P[16], M[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, P);
+    glGetFloatv(GL_MODELVIEW_MATRIX, M);
+    
+    glUniformMatrix4fv(glGetUniformLocation(pointShader->ID, "projection"), 1, GL_FALSE, P);
+    glUniformMatrix4fv(glGetUniformLocation(pointShader->ID, "view"), 1, GL_FALSE, M);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(QSplatVertex), vertexBuffer.data(), GL_STREAM_DRAW);
+
+    glBindVertexArrayAPPLE(vao);
+    glDrawArrays(GL_POINTS, 0, vertexBuffer.size());
+    glBindVertexArrayAPPLE(0);
+
+    vertexBuffer.clear();
+}
+
 void QSplatGUI::setup_matrices(bool dolighting)
 {
 	// Reset everything to identity
@@ -593,7 +674,7 @@ void QSplatGUI::setup_matrices(bool dolighting)
 
 	// Set up projection and modelview matrices
 	float near_depth = surface_depth;
-	float min_near = 1e-4f * theQSplat_Model->radius;
+	float min_near = 1e-6f * theQSplat_Model->radius;
 	if (near_depth < min_near) near_depth = min_near;
 
 	thecamera.SetGL(near_depth/DOF, near_depth*DOF,
@@ -912,6 +993,8 @@ bool QSplatGUI::second_pass(bool havecolor)
 // Wrap up the rendering
 void QSplatGUI::end_drawing(bool bailed)
 {
+    flush_modern_rendering();
+
 	switch (whichDriver) {
 	case OPENGL_POINTS:
 	case OPENGL_POINTS_CIRC:
