@@ -38,11 +38,12 @@ The project requires a modern C++ compiler and the following libraries:
 - **CMake** (3.16+)
 - **GLFW 3**
 - **GLM**
+- **Assimp** (Open Asset Import Library)
 - **OpenGL**
 
 On macOS, these can be installed via Homebrew:
 ```bash
-brew install cmake glfw glm
+brew install cmake glfw glm assimp
 ```
 
 ### Build Instructions
@@ -125,6 +126,18 @@ Absolutely. We are currently seeing a massive resurgence in point-based renderin
 *   **Web and Mobile Rendering:** Because point-based formats can be streamed and rendered progressively (showing a blurry version and refining it as the user stays still), the QSplat philosophy is ideal for low-bandwidth environments.
 
 In summary, while triangle rendering is the king of structured game assets, **Splatting** remains the most effective way to handle **massive, unstructured, and high-complexity 3D data.**
+
+---
+
+## Future Work & Contributing
+
+Contributions are welcome to further modernize this landmark project. Current areas of interest include:
+*   **Compute Shader Traversal:** Offloading the bounding sphere hierarchy traversal from the CPU to GPU Compute Shaders.
+*   **Metal/Vulkan Backend:** Native support for modern graphics APIs beyond OpenGL.
+*   **Gaussian Splatting Integration:** Implementing modern Gaussian kernels for high-fidelity surface reconstruction.
+*   **WebGPU Port:** Bringing high-performance multiresolution rendering to the browser.
+
+Please feel free to submit pull requests or open issues for feature requests and bug reports.
 
 ## License
 This project is subject to the original Stanford University licensing terms. Please refer to the `README` file (original documentation) for detailed licensing and usage restrictions.
