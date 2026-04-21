@@ -21,9 +21,96 @@ Leland Stanford Junior University.  All Rights Reserved.
 #include "qsplat_make_from_mesh.h"
 
 #define BIGNUM FLT_MAX
-#define DO_SWAP_LONG(x) (*(unsigned *)&(x) = \
-			SWAP_LONG(*(unsigned *)&(x)))
-#define DO_SWAP_FLOAT(x) DO_SWAP_LONG(x)
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+// Try to read a file using Assimp
+static bool read_assimp(const char *filename,
+			int &numleaves, QTree_Node * &leaves,
+			int &numfaces, face * &faces,
+			bool &have_colors,
+			std::string &comments)
+{
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(filename, 
+		aiProcess_Triangulate | 
+		aiProcess_JoinIdenticalVertices | 
+		aiProcess_SortByPType);
+
+	if (!scene || !scene->mRootNode || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
+		fprintf(stderr, "Assimp error: %s\n", importer.GetErrorString());
+		return false;
+	}
+
+	printf("Reading %s using Assimp...\n", filename);
+
+	// Count total vertices and faces across all meshes
+	numleaves = 0;
+	numfaces = 0;
+	for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+		numleaves += scene->mMeshes[i]->mNumVertices;
+		numfaces += scene->mMeshes[i]->mNumFaces;
+	}
+
+	leaves = new QTree_Node[numleaves];
+	faces = new face[numfaces];
+	have_colors = false;
+
+	int v_offset = 0;
+	int f_offset = 0;
+
+	for (unsigned int i = 0; i < scene->mNumMeshes; i++) {
+		aiMesh* mesh = scene->mMeshes[i];
+		
+		// Load vertices
+		for (unsigned int v = 0; v < mesh->mNumVertices; v++) {
+			leaves[v_offset + v].pos[0] = mesh->mVertices[v].x;
+			leaves[v_offset + v].pos[1] = mesh->mVertices[v].y;
+			leaves[v_offset + v].pos[2] = mesh->mVertices[v].z;
+
+			if (mesh->HasVertexColors(0)) {
+				have_colors = true;
+				leaves[v_offset + v].col[0] = (unsigned char)(mesh->mColors[0][v].r * 255);
+				leaves[v_offset + v].col[1] = (unsigned char)(mesh->mColors[0][v].g * 255);
+				leaves[v_offset + v].col[2] = (unsigned char)(mesh->mColors[0][v].b * 255);
+			} else {
+				leaves[v_offset + v].col[0] = 200;
+				leaves[v_offset + v].col[1] = 200;
+				leaves[v_offset + v].col[2] = 200;
+			}
+		}
+
+		// Load faces
+		for (unsigned int f = 0; f < mesh->mNumFaces; f++) {
+			aiFace& face_in = mesh->mFaces[f];
+			if (face_in.mNumIndices != 3) continue;
+			faces[f_offset + f][0] = v_offset + face_in.mIndices[0];
+			faces[f_offset + f][1] = v_offset + face_in.mIndices[1];
+			faces[f_offset + f][2] = v_offset + face_in.mIndices[2];
+		}
+
+		v_offset += mesh->mNumVertices;
+		f_offset += mesh->mNumFaces;
+	}
+
+	printf(" Done. Read %d vertices and %d faces.\n", numleaves, numfaces);
+	return true;
+}
+
+// Generic mesh reader - dispatches to PLY or Assimp
+bool read_mesh(const char *filename,
+	      int &numleaves, QTree_Node * &leaves,
+	      int &numfaces, face * &faces,
+	      bool &have_colors,
+	      std::string &comments)
+{
+	const char *ext = strrchr(filename, '.');
+	if (ext && strcasecmp(ext, ".ply") == 0) {
+		return read_ply(filename, numleaves, leaves, numfaces, faces, have_colors, comments);
+	}
+	return read_assimp(filename, numleaves, leaves, numfaces, faces, have_colors, comments);
+}
 
 
 // Unpack tstrips into faces

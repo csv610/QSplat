@@ -22,7 +22,7 @@ const char *QSPLATMAKE_VERSION = "1.01";
 
 static void usage(const char *myname)
 {
-	fprintf(stderr, "Usage: %s [-m threshold] in.ply out.qs\n", myname);
+	fprintf(stderr, "Usage: %s [-m threshold] in.{ply,obj,off,stl} out.qs\n", myname);
 	exit(1);
 }
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 	QTree_Node *leaves;
 	std::string comments;
 
-	if (!read_ply(infilename, numleaves, leaves, numfaces, faces, havecolor, comments)) {
+	if (!read_mesh(infilename, numleaves, leaves, numfaces, faces, havecolor, comments)) {
 		fprintf(stderr, "Couldn't read input file %s\n", infilename);
 		exit(1);
 	}

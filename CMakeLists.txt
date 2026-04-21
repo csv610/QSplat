@@ -7,8 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
+find_package(assimp REQUIRED)
 
-include_directories(${GLFW_INCLUDE_DIRS} /opt/homebrew/include)
+include_directories(${GLFW_INCLUDE_DIRS} /opt/homebrew/include ${ASSIMP_INCLUDE_DIRS})
 link_directories(${GLFW_LIBRARY_DIRS})
 
 set(COMMON_SOURCES
@@ -43,7 +44,7 @@ add_executable(qsplat_make
     ${COMMON_SOURCES}
 )
 target_compile_definitions(qsplat_make PRIVATE DARWIN)
-target_link_libraries(qsplat_make PRIVATE OpenGL::GL)
+target_link_libraries(qsplat_make PRIVATE OpenGL::GL ${ASSIMP_LIBRARIES})
 
 add_executable(qsplat
     ${QSPLAT_VIEWER_SOURCES}

@@ -18,6 +18,7 @@ This port maintains the core data structure and file format integrity while repl
 *   **Programmable Shading:** Implemented a GLSL-based shader pipeline for efficient point rasterization and real-time lighting.
 
 ### 🛠 Modern Engineering
+*   **Assimp Integration:** Expanded file format support. The converter now accepts **OBJ, STL, and OFF** in addition to the original PLY format, leveraging the Open Asset Import Library.
 *   **GLM Integration:** Utilizes the industry-standard **OpenGL Mathematics (GLM)** library for robust, shader-compatible data structures.
 *   **CMake Build System:** Replaced legacy Makefiles with a cross-platform CMake configuration, ensuring compatibility with the latest C++17 compilers and IDEs.
 *   **Smooth Motion:** Re-engineered the event loop to ensure consistent 60+ FPS performance even on Retina and 4K displays.
@@ -62,9 +63,9 @@ make -j$(sysctl -n hw.ncpu)
 ## Usage
 
 ### 1. Data Preparation
-Convert standard `.ply` meshes into the optimized `.qs` multiresolution format:
+Convert standard 3D meshes (PLY, OBJ, STL, OFF, etc.) into the optimized `.qs` multiresolution format:
 ```bash
-./qsplat_make input.ply output.qs
+./qsplat_make input.obj output.qs
 ```
 
 ### 2. Visualization
