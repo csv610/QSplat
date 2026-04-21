@@ -84,7 +84,8 @@ The interaction model preserves the original "feel" while adding modern convenie
 | **Rotate** | Left Mouse Button (Drag) |
 | **Zoom** | Scroll Wheel / `CTRL` + Left Mouse Button |
 | **Translate (Pan)** | Right Mouse Button / `SHIFT` + Left Mouse Button |
-| **Reset View** | `CTRL` + `R` |
+| **Reset View** | `CTRL` + `R` / `H` |
+| **Toggle Bounding Box** | `B` |
 | **Toggle Fullscreen** | `F` |
 | **Exit** | `ESC` / `CTRL` + `Q` |
 
