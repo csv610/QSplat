@@ -50,46 +50,10 @@ int main(int argc, char *argv[])
 	}
 
 
-	// Read the .ply file
-	int numleaves, numfaces;
-	face *faces;
-	bool havecolor;
-	QTree_Node *leaves;
-	std::string comments;
-
-	if (!read_mesh(infilename, numleaves, leaves, numfaces, faces, havecolor, comments)) {
-		fprintf(stderr, "Couldn't read input file %s\n", infilename);
+	if (!RunMakeQS(infilename, outfilename, threshold)) {
+		fprintf(stderr, "Conversion failed.\n");
 		exit(1);
 	}
-	if (numleaves < 4) {
-		fprintf(stderr, "Ummm...  That's an awfully small mesh you've got there...\n");
-		exit(1);
-	}
-	if (numfaces < 4) {
-		fprintf(stderr, "Ummm... I need a *mesh* as input.  That means triangles 'n stuff...\n");
-		exit(1);
-	}
-
-	// Compute per-vertex normals
-	find_normals(numleaves, leaves, numfaces, faces);
-
-	// Merge nodes
-	merge_nodes(numleaves, leaves, numfaces, faces, havecolor, threshold);
-
-	// Compute initial splat sizes
-	find_splat_sizes(numleaves, leaves, numfaces, faces);
-
-	// Don't need face data any more
-	delete [] faces;
-
-	// Initialize the tree
-	QTree qt(numleaves, leaves, havecolor);
-
-	// Build the tree...
-	qt.BuildTree();
-
-	// ... and write it out
-	qt.Write(outfilename, comments);
 	return 0;
 }
 

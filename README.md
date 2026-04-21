@@ -24,6 +24,7 @@ This port maintains the core data structure and file format integrity while repl
 *   **Smooth Motion:** Re-engineered the event loop to ensure consistent 60+ FPS performance even on Retina and 4K displays.
 
 ### 🖱 Enhanced Interaction Design
+*   **One-Step Workflow:** Seamlessly open standard meshes (**OBJ, PLY, STL, OFF**) directly in the viewer. The system automatically performs multiresolution conversion in the background, eliminating the need for a separate preprocessing step.
 *   **Standardized Navigation:** Intuitive scroll-wheel zooming and improved panning sensitivity.
 *   **Laptop & Trackpad Support:** Integrated modifier-key shortcuts (`SHIFT` and `CTRL`) for seamless navigation on mobile workstations.
 *   **Stability Enhancements:** Resolved legacy bugs related to near-plane clipping and scene recovery during extreme zooming.
@@ -62,16 +63,16 @@ make -j$(sysctl -n hw.ncpu)
 
 ## Usage
 
-### 1. Data Preparation
-Convert standard 3D meshes (PLY, OBJ, STL, OFF, etc.) into the optimized `.qs` multiresolution format:
+### 🚀 Direct Visualization
+You can now open standard 3D meshes (PLY, OBJ, STL, OFF) directly in the high-performance viewer. The system automatically converts them to the optimized `.qs` format in the background:
 ```bash
-./qsplat_make input.obj output.qs
+./qsplat model.obj
 ```
 
-### 2. Visualization
-Launch the high-performance viewer:
+### 🛠 Manual Data Preparation (Optional)
+For very large datasets, you may still want to pre-convert meshes into the optimized `.qs` multiresolution format:
 ```bash
-./qsplat model.qs
+./qsplat_make large_input.ply output.qs
 ```
 
 ### Controls Reference

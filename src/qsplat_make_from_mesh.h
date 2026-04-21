@@ -25,6 +25,8 @@ extern bool read_mesh(const char *filename,
 		      bool &have_colors,
 		      std::string &comments);
 
+extern bool RunMakeQS(const char *infilename, const char *outfilename, float threshold = 0.0f);
+
 extern void find_normals(int numleaves, QTree_Node *leaves,
 		         int numfaces, const face *faces);
 extern void merge_nodes(int &numleaves, QTree_Node *leaves,

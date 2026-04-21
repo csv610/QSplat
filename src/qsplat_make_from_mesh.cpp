@@ -112,6 +112,35 @@ bool read_mesh(const char *filename,
 	return read_assimp(filename, numleaves, leaves, numfaces, faces, have_colors, comments);
 }
 
+bool RunMakeQS(const char *infilename, const char *outfilename, float threshold)
+{
+	int numleaves, numfaces;
+	face *faces;
+	bool havecolor;
+	QTree_Node *leaves;
+	std::string comments;
+
+	if (!read_mesh(infilename, numleaves, leaves, numfaces, faces, havecolor, comments)) {
+		return false;
+	}
+	if (numleaves < 4 || numfaces < 4) {
+        delete[] faces;
+        delete[] leaves;
+		return false;
+	}
+
+	find_normals(numleaves, leaves, numfaces, faces);
+	merge_nodes(numleaves, leaves, numfaces, faces, havecolor, threshold);
+	find_splat_sizes(numleaves, leaves, numfaces, faces);
+	delete [] faces;
+
+	QTree qt(numleaves, leaves, havecolor);
+	qt.BuildTree();
+	qt.Write(outfilename, comments);
+    
+    return true;
+}
+
 
 // Unpack tstrips into faces
 static void unpack_tstrips(int tstripdatalen, const int *tstrips,

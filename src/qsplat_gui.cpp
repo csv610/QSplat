@@ -36,6 +36,8 @@ Leland Stanford Junior University.  All Rights Reserved.
 #define SHOWPROG_TIME	1.5f
 
 
+#include "qsplat_make_from_mesh.h"
+
 // The GUI global variable
 QSplatGUI *theQSplatGUI;
 
@@ -46,11 +48,40 @@ QSplatGUI::~QSplatGUI()
     if (vbo) glDeleteBuffers(1, &vbo);
 }
 
+std::string QSplatGUI::AutoMakeQS(const char *filename)
+{
+    std::string in(filename);
+    const char *ext = strrchr(filename, '.');
+    if (ext && strcasecmp(ext, ".qs") == 0)
+        return in;
+
+    printf("Auto-converting %s to QS format...\n", filename);
+    
+    // Generate a temporary filename in /tmp/
+    char tmpname[255];
+    static int counter = 0;
+    sprintf(tmpname, "/tmp/qsplat_auto_%d.qs", counter++);
+
+    if (RunMakeQS(filename, tmpname)) {
+        printf("Conversion successful: %s\n", tmpname);
+        return std::string(tmpname);
+    }
+
+    fprintf(stderr, "Auto-conversion failed for %s\n", filename);
+    return "";
+}
+
 void QSplatGUI::OpenModel(const char *filename)
 {
+    std::string actual_file = AutoMakeQS(filename);
+    if (actual_file == "") {
+        display_dialog("Error", "Could not open or convert mesh file.");
+        return;
+    }
+
     setmodel(NULL);
     QSplat_Model *q;
-    q = QSplat_Model::Open(filename);
+    q = QSplat_Model::Open(actual_file.c_str());
     if (!q) {
         display_dialog("Error", "Couldn't open QSplat file");
         return;

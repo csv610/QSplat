@@ -32,6 +32,7 @@ enum Driver { OPENGL_POINTS, OPENGL_POINTS_CIRC,
 
 #include "qsplat_shader.h"
 #include <vector>
+#include <string>
 
 struct QSplatVertex {
     glm::vec3 pos;
@@ -168,6 +169,7 @@ public:
 
         // Open and display a model
         void OpenModel(const char *filename);
+        std::string AutoMakeQS(const char *filename);
 
 	// Query whether we are dragging the object
 	bool dragging()

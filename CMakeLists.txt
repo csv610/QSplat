@@ -31,6 +31,8 @@ set(QSPLAT_VIEWER_SOURCES
     src/qsplat_draw_software.cpp
     src/qsplat_draw_software_tiles.cpp
     src/qsplat_gui_glfw.cpp
+    src/qsplat_make_from_mesh.cpp
+    src/qsplat_make_qtree_v11.cpp
 )
 
 set(QSPLAT_MAKE_SOURCES
@@ -51,6 +53,6 @@ add_executable(qsplat
     ${COMMON_SOURCES}
 )
 target_compile_definitions(qsplat PRIVATE DARWIN)
-target_link_libraries(qsplat PRIVATE OpenGL::GL ${GLFW_LIBRARIES} "-framework Carbon")
+target_link_libraries(qsplat PRIVATE OpenGL::GL ${GLFW_LIBRARIES} ${ASSIMP_LIBRARIES} "-framework Carbon")
 
 install(TARGETS qsplat qsplat_make DESTINATION bin)
