@@ -26,5 +26,54 @@ This fork (2026) aims to bring the original codebase into the modern era while p
 ## Technical Note on Math
 While the rendering pipeline now uses modern GLM-backed buffers, the core camera interaction math (Quaternions/Translations) has been intentionally kept in its original form. This ensures that the highly-tuned "feel" of the original viewer is preserved exactly as the authors intended.
 
+## Installation
+
+### Prerequisites
+Ensure you have the following installed (recommended via Homebrew on macOS):
+- **CMake** (3.16+)
+- **GLFW** (`brew install glfw`)
+- **GLM** (`brew install glm`)
+- **OpenGL** (Included with macOS)
+
+### Build Instructions
+```bash
+# Clone the repository
+git clone git@github.com:csv610/QSplat.git
+cd QSplat
+
+# Create a build directory
+mkdir build && cd build
+
+# Configure and build
+cmake ..
+make -j$(sysctl -n hw.ncpu)
+```
+
+## Usage
+
+### 1. Converting Models
+QSplat uses its own multiresolution `.qs` format. You must first convert a `.ply` mesh:
+```bash
+./qsplat_make input.ply output.qs
+```
+
+### 2. Viewing Models
+Launch the modernized GPU-accelerated viewer:
+```bash
+./qsplat model.qs
+```
+
+### Controls & Shortcuts
+The interaction has been modernized for better usability on laptops and high-resolution displays:
+
+| Action | Control |
+| :--- | :--- |
+| **Rotate** | Left Mouse Button (Drag) |
+| **Zoom** | Scroll Wheel **OR** `CTRL` + Left Mouse Button |
+| **Pan** | Right Mouse Button **OR** `SHIFT` + Left Mouse Button |
+| **Reset View** | `CTRL` + `R` |
+| **Toggle Fullscreen** | `F` |
+| **Quit** | `ESC` (exit fullscreen) or `CTRL` + `Q` |
+
 ## License
 This software is provided "as is" and remains subject to the original Stanford University licensing terms found in the `README` file (original documentation).
