@@ -125,6 +125,25 @@ QSplat features a "Target Frame Rate" system. If the computer is struggling to m
 
 ---
 
+## 8. Modern Context: Gaussian Splatting
+
+While QSplat was a pioneer in the late 90s, the principles of point-based rendering have seen a massive resurgence recently with **3D Gaussian Splatting (3DGS)**. This technique, introduced in 2023, has become a cornerstone of neural rendering and real-time radiance fields.
+
+### 8.1 From Spheres to Gaussians
+In QSplat, we use **Bounding Spheres** to represent the geometry. In 3D Gaussian Splatting, each "point" is replaced by a **3D Gaussian distribution**. Instead of a hard-edged sphere, a Gaussian has a soft, probabilistic density that fades out from its center. This allows for:
+*   **Seamless Blending:** Overlapping Gaussians blend together smoothly, avoiding the "cracks" or "holes" that can sometimes appear between discrete points.
+*   **Anisotropic Scaling:** Unlike spheres, Gaussians can be stretched and rotated into ellipsoids, allowing them to represent thin surfaces or elongated structures more efficiently.
+
+### 8.2 Why QSplat Still Matters
+If you understand QSplat, you already understand the architectural foundations of modern Gaussian Splatters:
+1.  **Hierarchical Organization:** Like QSplat, modern systems often use spatial hierarchies (like Octrees or BVHs) to quickly cull Gaussians that are not in the camera's view.
+2.  **Splatting Pipeline:** The process of projecting a 3D volume (a sphere or a Gaussian) onto a 2D screen and rasterizing it is the "Splatting" in both names.
+3.  **Real-Time Performance:** Both systems prioritize interaction. They use specialized sorting and tiling algorithms to ensure that millions of primitives can be rendered at interactive frame rates.
+
+By studying QSplat, you are learning the "DNA" of the algorithms that power the most advanced AI-driven 3D reconstruction tools available today.
+
+---
+
 ## Summary for Students
 QSplat represents a fundamental shift in thinking about 3D data. By moving away from triangles and toward a **hierarchical point representation**, it allows us to visualize the largest 3D scans ever created. As you explore this codebase, pay close attention to the `qsplat_traverse_v11.h` file—it is the heart of the system where the magic of multiresolution rendering happens.
 
