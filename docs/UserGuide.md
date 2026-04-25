@@ -127,20 +127,35 @@ QSplat features a "Target Frame Rate" system. If the computer is struggling to m
 
 ## 8. Modern Context: Gaussian Splatting
 
-While QSplat was a pioneer in the late 90s, the principles of point-based rendering have seen a massive resurgence recently with **3D Gaussian Splatting (3DGS)**. This technique, introduced in 2023, has become a cornerstone of neural rendering and real-time radiance fields.
+While QSplat was a pioneer in the late 90s, the principles of point-based rendering have seen a massive resurgence recently with **3D Gaussian Splatting (3DGS)**. This technique, introduced in 2023, has become a cornerstone of neural rendering.
 
-### 8.1 From Spheres to Gaussians
-In QSplat, we use **Bounding Spheres** to represent the geometry. In 3D Gaussian Splatting, each "point" is replaced by a **3D Gaussian distribution**. Instead of a hard-edged sphere, a Gaussian has a soft, probabilistic density that fades out from its center. This allows for:
-*   **Seamless Blending:** Overlapping Gaussians blend together smoothly, avoiding the "cracks" or "holes" that can sometimes appear between discrete points.
-*   **Anisotropic Scaling:** Unlike spheres, Gaussians can be stretched and rotated into ellipsoids, allowing them to represent thin surfaces or elongated structures more efficiently.
+### 8.1 What is a 3D Gaussian?
+In QSplat, a point is a "hard" sphere with a fixed radius. In 3DGS, each point is a "soft" **3D Gaussian distribution**. Mathematically, a Gaussian is defined by:
+*   **Mean ($\mu$):** The center position of the point in 3D space (just like QSplat).
+*   **Covariance ($\Sigma$):** This defines the shape and orientation. Unlike a sphere, a Gaussian can be stretched into an ellipsoid. This is stored using **Scaling** and **Rotation** parameters.
+*   **Opacity ($\alpha$):** How transparent the Gaussian is.
+*   **Spherical Harmonics (SH):** Instead of a single color, Gaussians store SH coefficients. This allows the color of the point to change depending on the angle you are looking at it from (simulating reflections and glossiness).
 
-### 8.2 Why QSplat Still Matters
-If you understand QSplat, you already understand the architectural foundations of modern Gaussian Splatters:
-1.  **Hierarchical Organization:** Like QSplat, modern systems often use spatial hierarchies (like Octrees or BVHs) to quickly cull Gaussians that are not in the camera's view.
-2.  **Splatting Pipeline:** The process of projecting a 3D volume (a sphere or a Gaussian) onto a 2D screen and rasterizing it is the "Splatting" in both names.
-3.  **Real-Time Performance:** Both systems prioritize interaction. They use specialized sorting and tiling algorithms to ensure that millions of primitives can be rendered at interactive frame rates.
+### 8.2 The Differentiable Rendering Pipeline
+One of the biggest differences is how the data is created. 
+*   **QSplat:** We take a known 3D mesh and convert it into spheres.
+*   **3DGS:** We take a set of **2D photos** of a scene. The system starts with a sparse cloud of Gaussians and uses a process called **Differentiable Rendering**. It renders the Gaussians from the same angles as the photos and calculates the "loss" (the difference between the render and the photo). It then uses **Gradient Descent** to move, stretch, and recolor the Gaussians until the rendered scene matches the photos perfectly.
 
-By studying QSplat, you are learning the "DNA" of the algorithms that power the most advanced AI-driven 3D reconstruction tools available today.
+### 8.3 Rasterization and Alpha Blending
+The rendering process (the "Splatting") is highly optimized:
+1.  **Projection:** The 3D Gaussians are projected onto the 2D screen coordinate system.
+2.  **Tiling:** The screen is divided into tiles (e.g., 16x16 pixels). Gaussians are sorted by depth within each tile.
+3.  **Alpha Compositing:** For every pixel, the system blends the overlapping Gaussians from front to back using the standard volume rendering formula:
+    $$C = \sum_{i \in N} c_i \alpha_i \prod_{j=1}^{i-1} (1 - \alpha_j)$$
+    This "back-to-front" or "front-to-back" blending is what creates the high-fidelity, photo-realistic results.
+
+### 8.4 Why Study QSplat First?
+Understanding QSplat provides the foundation for 3DGS:
+1.  **Spatial Data Structures:** Both systems rely on organizing points in space to render millions of them efficiently.
+2.  **Point Primitives:** The concept of moving away from triangles to "splats" is identical.
+3.  **Real-Time Performance:** Both systems push the limits of GPU throughput to achieve interactive frame rates.
+
+By mastering the hierarchy and traversal in QSplat, you are learning the core architectural principles that modern AI-driven rendering systems use to reconstruct the world from images.
 
 ---
 
